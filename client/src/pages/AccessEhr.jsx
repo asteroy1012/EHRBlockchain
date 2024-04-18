@@ -11,7 +11,7 @@ function AccessEhr({data}) {
     const[toggle, settoggle] = useState(false);
     const [incdata, setIncdata] = useState([]);
     const[id, setid] = useState(0);
-    const[medicalRecords, setMedicalRecords] = useState([]);
+    // const[medicalRecords, setMedicalRecords] = useState([]);
 
     useEffect( () =>{
 
@@ -31,9 +31,9 @@ function AccessEhr({data}) {
 
     },[]);
 
-    useEffect( ()=>{
-        fetchMedicalRecords();
-    },[]);
+    // useEffect( ()=>{
+    //     fetchMedicalRecords();
+    // },[]);
 
 
     function clickHandler()
@@ -75,7 +75,7 @@ function AccessEhr({data}) {
                     const gas = await contract.methods.addMedicalRecord(id, input.p_name, input.cond ).estimateGas({from: address});
                     const receipt = await contract.methods.addMedicalRecord(id, input.p_name, input.cond).send({from: address, gas:'161108'});
                     alert(`Medical Record added, Gas used: ${gas}, TxnHash: ${receipt.transactionHash}`);
-                    fetchMedicalRecords();
+                    // fetchMedicalRecords();
             }
 
             catch(error)
@@ -89,33 +89,33 @@ function AccessEhr({data}) {
 
     }
 
-    async function fetchMedicalRecords() {
-        try{
-            const contract = state.contract;
-            const recordsCount = await contract.methods.getMedicalRecordCount().call();
-            const records = [];
-            for(let i=0; i< recordsCount; i++)
-            {
-                const record = await contract.methods.getMedicalRecords(i).call();
-                console.log(record);
-                records.push(record);
-            }
+    // async function fetchMedicalRecords() {
+    //     try{
+    //         const contract = state.contract;
+    //         const recordsCount = await contract.methods.getMedicalRecordCount().call();
+    //         const records = [];
+    //         for(let i=0; i< recordsCount; i++)
+    //         {
+    //             const record = await contract.methods.getMedicalRecords(i).call();
+    //             console.log(record);
+    //             records.push(record);
+    //         }
 
-            setMedicalRecords(records);
-        }
+    //         setMedicalRecords(records);
+    //     }
 
-        catch(e){
+    //     catch(e){
 
-            console.error('Error fetching medical records', e);
-        }
-    }
+    //         console.error('Error fetching medical records', e);
+    //     }
+    // }
 
     let inp = data;
     return(
         <>
         <DoctorsHeader doctorHandle = {clickHandler} />
         <ViewRecords getData = {inp}/>
-        <EhrRecords forwardData = {medicalRecords} />
+        <EhrRecords forwardData = {incdata} />
         {toggle && <EHRModal onSub = {clickHandler}  onGet = {getdata} />}
         </>
 

@@ -69,9 +69,9 @@ export default function EhrRecords({ forwardData }) {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {listAuthorize.map((user) => (
                             <tr key={user.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.provider}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.condition}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.public_address}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.p_name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-black font-platy">{user.cond}</td>
                             </tr>
                         ))}
                     </tbody>
