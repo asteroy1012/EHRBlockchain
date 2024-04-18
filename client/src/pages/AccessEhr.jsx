@@ -5,13 +5,25 @@ import Web3 from "web3";
 import ETH from "../contracts/Ehr.json";
 import { useState, useEffect } from 'react';
 import EhrRecords from "../components/EhrRecords";
-function AccessEhr({data}) {
+function AccessEhr() {
 
     const[state, setState] = useState({web3: null, contract: null});
     const[toggle, settoggle] = useState(false);
     const [incdata, setIncdata] = useState([]);
-    const[id, setid] = useState(0);
-    // const[medicalRecords, setMedicalRecords] = useState([]);
+    const[doctorToggle, setdoctorToggle] = useState(false);
+    const[recordToggle, setRecordToggle] = useState(false);
+
+
+    function onRecordClick()
+    {
+        setRecordToggle( (state) => !state);
+    }
+
+    function onDocClick()
+    {
+        setdoctorToggle((state) => !state);
+        
+    }
 
     useEffect( () =>{
 
@@ -44,10 +56,6 @@ function AccessEhr({data}) {
     }
 
     async function verifyAddressWithBalance(address) {
-        if (!address) {
-            console.error("Empty address provided");
-            return false;
-        }
         try {
           const balance = await state.web3.eth.getBalance(address);
           const isValid = balance !== '0';
@@ -61,19 +69,17 @@ function AccessEhr({data}) {
 
     async function getdata(input)
     {
-    const updatedData = [...incdata, input];
-    setid((iid) =>{iid++});
-    // Update the state with the new data array
-    setIncdata(updatedData);
         const address = input.public_address;
+        const name = input.p_name;
+        const condition = input.cond;
         const isValidAddress = await verifyAddressWithBalance(address);
         if(isValidAddress) {
             alert('Address is valid and has balance. Proceeding to add a record...');
             try{
 
                 const contract = state.contract;
-                    const gas = await contract.methods.addMedicalRecord(id, input.p_name, input.cond ).estimateGas({from: address});
-                    const receipt = await contract.methods.addMedicalRecord(id, input.p_name, input.cond).send({from: address, gas:'161108'});
+                    const gas = await contract.methods.addMedicalRecord(address,name, condition).estimateGas({from: address});
+                    const receipt = await contract.methods.addMedicalRecord(address, name, condition).send({from: address, gas:'143628'});//gas:'161108';
                     alert(`Medical Record added, Gas used: ${gas}, TxnHash: ${receipt.transactionHash}`);
                     // fetchMedicalRecords();
             }
@@ -89,34 +95,13 @@ function AccessEhr({data}) {
 
     }
 
-    // async function fetchMedicalRecords() {
-    //     try{
-    //         const contract = state.contract;
-    //         const recordsCount = await contract.methods.getMedicalRecordCount().call();
-    //         const records = [];
-    //         for(let i=0; i< recordsCount; i++)
-    //         {
-    //             const record = await contract.methods.getMedicalRecords(i).call();
-    //             console.log(record);
-    //             records.push(record);
-    //         }
-
-    //         setMedicalRecords(records);
-    //     }
-
-    //     catch(e){
-
-    //         console.error('Error fetching medical records', e);
-    //     }
-    // }
-
-    let inp = data;
     return(
         <>
-        <DoctorsHeader doctorHandle = {clickHandler} />
-        <ViewRecords getData = {inp}/>
-        <EhrRecords forwardData = {incdata} />
+        <DoctorsHeader doctorHandle = {clickHandler} onView = {onDocClick} onRecordView = {onRecordClick} />
+        
+        {recordToggle && <EhrRecords forwardData = {incdata} />}
         {toggle && <EHRModal onSub = {clickHandler}  onGet = {getdata} />}
+        {doctorToggle && <ViewRecords />}
         </>
 
 );

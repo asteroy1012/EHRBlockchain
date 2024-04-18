@@ -1,55 +1,76 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.25;
+
 contract Ehr {
-    // Struct to represent a patient's medical record
-    struct MedicalRecord {
-        uint256 patientId;
+
+    struct Doctor{
+        uint256 doctorId;
+        string name;
+        address provider;
+    }
+
+    uint patientid = 0;
+    uint docId = 0;
+
+    struct MedicalRecord{
+
+        uint256 patientID;
         string name;
         string condition;
-        uint256 timestamp;
-        address provider; // Address of the healthcare provider who added the record
+        address provider;
     }
 
-    // Array to store medical records
-    MedicalRecord[] public medicalRecords;
+    MedicalRecord[] public Records;
+    Doctor[] public ValidDoctors;
 
-    // Mapping to store authorized providers for each patient
-    mapping(uint256 => mapping(address => bool)) public authorizedProviders;
 
-    // Event to log when a medical record is added
-    event MedicalRecordAdded(uint256 indexed patientId, string name, string condition, uint256 timestamp, address provider);
-
-    // Modifier to check if the sender is an authorized provider for a patient
-    modifier onlyAuthorized(uint256 _patientId) {
-        require(authorizedProviders[_patientId][msg.sender], "Sender is not authorized for this patient");
-        _;
+    function ValidateDoctor(address _a, string memory _name ) public {
+        Doctor memory newDoctor = Doctor(docId,_name, _a);
+        ValidDoctors.push(newDoctor);
+        docId +=1;
     }
 
-    // Function to add a new medical record
-    function addMedicalRecord(uint256 _patientId, string memory _name, string memory _condition) public{
-        MedicalRecord memory newRecord = MedicalRecord(_patientId, _name, _condition, block.timestamp, msg.sender);
-        medicalRecords.push(newRecord);
-        emit MedicalRecordAdded(_patientId, _name, _condition, block.timestamp, msg.sender);
+    function getValidDoctors() public view returns(Doctor[] memory)
+    {
+        return ValidDoctors;
     }
 
-    // Function to authorize a healthcare provider to access patient's records
-    function authorizeProvider(uint256 _patientId, address _provider) public {
-        authorizedProviders[_patientId][_provider] = true;
+    function addMedicalRecord(address _a, string memory _name, string memory _condition ) public {
+
+        bool isValid = false;
+        for( uint i=0;i<ValidDoctors.length;i++)
+        {
+            if(ValidDoctors[i].provider == _a)
+            {
+                isValid = true;
+                break;
+            }
+        }
+
+        require(isValid, "Unauthorized User");
+        MedicalRecord memory newRecord = MedicalRecord(patientid, _name, _condition, _a);
+        patientid +=1;
+        Records.push(newRecord);
     }
 
-    // Function to revoke authorization from a healthcare provider
-    function revokeAuthorization(uint256 _patientId, address _provider) public {
-        authorizedProviders[_patientId][_provider] = false;
+    function getMedicalRecord() public view returns(MedicalRecord[] memory){
+        return Records;
     }
 
-    // Function to get the number of medical records for a patient
-    function getMedicalRecordCount() public view returns (uint256) {
-        return medicalRecords.length;
+    function checkDoctor(address _a) public view returns (bool)
+    {
+        bool isValid = false;
+        for(uint i=0;i<ValidDoctors.length;i++)
+        {
+            if(ValidDoctors[i].provider == _a)
+            {
+                isValid = true;
+                break;
+            }
+        }
+
+        return isValid;
     }
 
-    // Function to get all medical records
-    function getMedicalRecords() public view returns (MedicalRecord[] memory) {
-        return medicalRecords;
-    }
+
 }

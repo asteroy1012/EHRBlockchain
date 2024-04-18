@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function DoctorsHeader({doctorHandle})
+export default function DoctorsHeader({doctorHandle, onView, onRecordView})
 {
     return(
         <>
@@ -9,8 +9,8 @@ export default function DoctorsHeader({doctorHandle})
         <div>
         <ul className="flex items-center gap-[2vw] text-white font-primaryRegular mt-10 mr-20">
                 <li className="mr-3"><motion.button  onClick={doctorHandle} whileHover={{scale:1.2, originX:0}} className="hover:text-sky-500">Add EHR</motion.button></li>
-                <li><motion.button whileHover={{scale:1.2}} className="hover:text-sky-500">View Medical Records</motion.button></li>
-                <li className="ml-3"><motion.button whileHover={{scale:1.2, originX:0}} className="hover:text-sky-500">View Doctors</motion.button></li>
+                <li><motion.button onClick = {onRecordView} whileHover={{scale:1.2}} className="hover:text-sky-500">View Medical Records</motion.button></li>
+                <li className="ml-3"><motion.button onClick = {onView} whileHover={{scale:1.2, originX:0}} className="hover:text-sky-500">View Doctors</motion.button></li>
         </ul>
         </div>
         {/* <div className=" flex items-center gap-[1vw] mr-5">

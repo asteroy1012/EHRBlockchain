@@ -8,14 +8,13 @@ import SigninModal from '../components/SignInModal';
 import { useNavigate } from 'react-router-dom';
 
 
-function FirstPage({onData}) {
+function FirstPage() {
   const navigate = useNavigate();
   const[modal,setmodal] = useState(false);
   const[state, setState] = useState({web3: null, contract: null});
   const[signinmodal, setSigninModal] = useState(false);
-  const [authorizedAddresses, setAuthorizedAddresses] = useState([]);
-  let address = "";
-  let address1 = "";
+  
+  
 
   useEffect( () => {
 
@@ -61,19 +60,21 @@ function FirstPage({onData}) {
   
 
   async function handleAddressReceived(input) {
-    onData(input);
-    address = input.public_add;
+    const address = input.public_add;
+    const name = input.first_name + input.last_name;
+
     const isValidAddress = await verifyAddressWithBalance(address);
     if (isValidAddress) {
       alert('Address is valid and has balance. Proceeding to authorize provider...');
       try {
         const contract = state.contract;
-        const gas = await contract.methods.authorizeProvider(input.id, address).estimateGas({ from: address });
+        const gas = await contract.methods.ValidateDoctor(address, name).estimateGas({ from: address });
+        console.log(gas);
         const gasPrice = await state.web3.eth.getGasPrice();
         const totalCost = gas * gasPrice;
-        await contract.methods.authorizeProvider(input.id, address).send({ from: address});
+        await contract.methods.ValidateDoctor(address, name).send({ from: address, gas: '115063'});
         alert(`Address authorized successfully, Gas used: ${gas}, Gas price: ${gasPrice}, Total Cost: ${totalCost} `);
-        setAuthorizedAddresses(prevAddresses => [...prevAddresses, address]);
+        setmodal( (state) => {!state});
       } catch (error) {
         console.error('Error authorizing provider:', error);
         alert('Failed to authorize provider');
@@ -83,20 +84,21 @@ function FirstPage({onData}) {
     }
   }
 
-  async function checkAuthorization(address, patientId) {
-    try {
-      const contract = state.contract;
-      const isAuthorized = await contract.methods.authorizedProviders(patientId, address).call();
-      return isAuthorized;
-    } catch (error) {
-      console.error('Error checking authorization:', error);
-      return false;
-    }
-  }
+  // async function checkAuthorization(address, patientId) {
+  //   try {
+  //     const contract = state.contract;
+  //     const isAuthorized = await contract.methods.authorizedProviders(patientId, address).call();
+  //     return isAuthorized;
+  //   } catch (error) {
+  //     console.error('Error checking authorization:', error);
+  //     return false;
+  //   }
+  // }
   
   async function handleCheckAuthorization(input) {
-    address1 = input.public_add;
-    const isAuthorized = await checkAuthorization(address1, input.id);
+    const address1 = input.public_add;
+    const contract = state.contract;
+    const isAuthorized = await contract.methods.checkDoctor(address1).call();
     if (isAuthorized) {
       alert('The address is authorized.');
       navigate('/doctors');
