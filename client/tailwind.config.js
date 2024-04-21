@@ -13,6 +13,9 @@ export default {
         cherryRegular:['CherryBombOne'],
         'platy': ['Platypi', 'serif']
 
+      },
+      spacing: {
+        '128':'32rem'
       }
     },
   },

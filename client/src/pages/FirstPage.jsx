@@ -6,15 +6,15 @@ import Web3 from 'web3';
 import ETH from "../contracts/Ehr.json"
 import SigninModal from '../components/SignInModal';
 import { useNavigate } from 'react-router-dom';
-
+import Confirmation from '../components/Confirmation';
 
 function FirstPage() {
   const navigate = useNavigate();
   const[modal,setmodal] = useState(false);
   const[state, setState] = useState({web3: null, contract: null});
   const[signinmodal, setSigninModal] = useState(false);
-  
-  
+  const[conf, setconf] = useState(false);
+  const[confdata, setconfdata]  = useState({gas:'', gasPrice:'', totalCost:'', status:false});
 
   useEffect( () => {
 
@@ -33,7 +33,10 @@ function FirstPage() {
     provider && template();
   }, []);
 
-  
+  function ConfHandler() 
+  {
+    setconf(!conf);
+  }
 
 
   function ClickHandler()
@@ -61,7 +64,7 @@ function FirstPage() {
 
   async function handleAddressReceived(input) {
     const address = input.public_add;
-    const name = input.first_name + input.last_name;
+    const name = input.first_name + " " + input.last_name;
 
     const isValidAddress = await verifyAddressWithBalance(address);
     if (isValidAddress) {
@@ -72,9 +75,14 @@ function FirstPage() {
         console.log(gas);
         const gasPrice = await state.web3.eth.getGasPrice();
         const totalCost = gas * gasPrice;
-        await contract.methods.ValidateDoctor(address, name).send({ from: address, gas: '115063'});
-        alert(`Address authorized successfully, Gas used: ${gas}, Gas price: ${gasPrice}, Total Cost: ${totalCost} `);
-        setmodal( (state) => {!state});
+        await contract.methods.ValidateDoctor(address, name).send({ from: address, gas: '120000'});
+        // alert(`Address authorized successfully, Gas used: ${gas}, Gas price: ${gasPrice}, Total Cost: ${totalCost} `);
+        
+        setconfdata({gas:gas, gasPrice:gasPrice, totalCost: totalCost, status: true });
+        setconf(true);
+        setmodal( false);
+        
+        
       } catch (error) {
         console.error('Error authorizing provider:', error);
         alert('Failed to authorize provider');
@@ -83,7 +91,6 @@ function FirstPage() {
       alert('Invalid address or insufficient balance.');
     }
   }
-
   // async function checkAuthorization(address, patientId) {
   //   try {
   //     const contract = state.contract;
@@ -117,6 +124,7 @@ function FirstPage() {
     <Header onHandle= {SignInHandler} onSign = {ClickHandler} />
     
     <Content onModal={ClickHandler}/>
+    {conf &&<Confirmation onData = {confdata} onClose = {ConfHandler} />} 
     {signinmodal && <SigninModal onModal = {SignInHandler} onFormReceived = {handleCheckAuthorization} />}
     {modal && <ModalGetStarted onModal={ClickHandler} onFormReceived={handleAddressReceived} />}
     
